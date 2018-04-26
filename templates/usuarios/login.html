@@ -1,0 +1,18 @@
+{%extends 'base/base.html'%}
+
+{%block opcionesnavbar%}
+<li><a href="{%url 'registrarse'%}">Registrarse</a></li>
+{%endblock%}
+
+{%block content%}
+<div class="container">
+<form method="post" class="form-signin-heading">
+   <h2 class="form-signin-heading">Iniciar sesion</h2>
+   {%csrf_token%}
+   {{form.as_p}}
+   <button class="btn btn-default" type="submit" value="Entrar">Entrar</button>
+</form>
+
+</div>
+
+{%endblock%}

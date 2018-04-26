@@ -1,0 +1,465 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+   <title>Document</title>
+</head>
+<link rel="stylesheet" href="{%static 'DnD.css'%}">
+<script src="/static/jquery.min.js"></script>
+<script src="/static/ui.min.js"></script>
+<script>
+   $(document).ready(function(){
+       $( "#Container" ).sortable({});
+       $("#Source").droppable({
+   drop: function( evento, ui ) {
+     ui.helper.remove();
+   }
+   });
+   });
+</script>
+<script type="text/javascript">
+      var instrucciones;
+      var container;
+      var dragging;
+      var contadorSalidas = 0;
+      var salidaUsuario = [];
+      var valor; //lo que tiene actualmente
+      var c = 1;
+      var centesimas = 0;
+      var segundos = 0;
+      var minutos = 0;
+      var horas = 0;
+      window.addEventListener('load',init);
+      function empezar(){
+            setTimeout('inicio()',1000)
+        }
+      function inicio () {
+         control = setInterval(cronometro,10);
+        }
+      function cronometro () {
+         if (centesimas < 99) {
+          centesimas++;
+          if (centesimas < 10) { centesimas = "0"+centesimas }
+          Centesimas.innerHTML = ":"+centesimas;
+         }
+         if (centesimas == 99) {
+          centesimas = -1;
+         }
+         if (centesimas == 0) {
+          segundos ++;
+          if (segundos < 10) { segundos = "0"+segundos }
+          Segundos.innerHTML = ":"+segundos;
+         }
+         if (segundos == 59) {
+          segundos = -1;
+         }
+         if ( (centesimas == 0)&&(segundos == 0) ) {
+          minutos++;
+          if (minutos < 10) { minutos = "0"+minutos }
+          Minutos.innerHTML = ":"+minutos;
+         }
+         if (minutos == 59) {
+          minutos = -1;
+         }
+         if ( (centesimas == 0)&&(segundos == 0)&&(minutos == 0) ) {
+          horas ++;
+          if (horas < 10) { horas = "0"+horas }
+          Horas.innerHTML = horas;
+         }
+        }
+      function init(){
+       container = document.querySelector(".container");
+       container.addEventListener('dragover',dragover,false)
+       container.addEventListener('dragleave',dragleave,false)
+       container.addEventListener('dragenter',dragenter,false)
+       container.addEventListener('drop',drop,false)
+       var elements = document.getElementsByClassName('instrucciones');
+       for (i in elements){
+            var element = elements[i];
+            if(typeof element.style != "undefined"){
+                element.addEventListener('dragstart',dragstart,false);
+                element.addEventListener("dragend",dragend,false);
+            }
+       }
+      }
+      function cambiarInstruccion(instruc,clase){
+         objeto = document.getElementById(instruc);
+         objeto.className = clase;
+      }
+      function obtenerSalidas(){
+         var vectorSalida = [];
+         var salidas =document.getElementsByClassName("salida");
+         for (var i = 0; i < salidas.length; i++) {
+            vectorSalida[i+1] = salidas[i].getAttribute("valor");
+         }
+         return vectorSalida;
+      }
+      function obtenerPiso(){
+         contador = 0;
+         var piso = [];
+         var losas = document.getElementsByClassName("losa");
+         for (var i = 0; i < losas.length; i++) {
+            piso[i] = parseInt(losas[i].getAttribute("valor"));
+            losas[i].id = "losa" + contador;
+            contador++;
+         }
+         return piso;
+      }
+      function sleep(miliseconds) {
+         var currentTime = new Date().getTime();
+
+         while (currentTime + miliseconds >= new Date().getTime()) {
+         }
+      }
+      function pasoApaso(){
+         document.getElementById("ejecutar").disabled = true;
+         var respuestas  = obtenerSalidas(); //vector de salida
+         var piso = obtenerPiso();
+         var instrucciones = obtenerInstrucciones();
+         if (instrucciones.length >= (c+1)) {
+            var instruccion = instrucciones[c].split("-"); //split en caso de ser una instruccion con numero
+            instrucId = "instruc" + c;
+            cambiarInstruccion(instrucId,"ejecutando");
+               switch (instruccion[0]) {
+                  case "in":
+                     valor = entrada();
+                     if (!(valor >= 0)) {
+                        if ( comparar(salidaUsuario,respuestas)) {
+                           guardarResultados();
+                           document.getElementById("resultado").textContent = "Muy bien! lo has logrado";
+                        }
+                        else {
+                           document.getElementById("resultado").textContent = "MAL";
+                        }
+                     }
+                     document.getElementById("valor").textContent = valor;
+                     break;
+                  case "out":
+                     salidaUsuario[contadorSalidas] = valor;
+                     clon = document.getElementById("valor").cloneNode(true);
+                     clon.className = "entrada";
+                     document.getElementById("salidaUsuario").appendChild(clon);
+                     contadorSalidas++;
+                     break;
+                  case "cpy2":
+                     var id = "losa" + instruccion[1];
+                     piso[instruccion[1]] = valor;
+                     document.getElementById(id).textContent = piso[instruccion[1]];
+                     break;
+                  case "cpyf":
+                     valor = piso[instruccion[1]];
+                     document.getElementById("valor").textContent = valor;
+                     break;
+                  case "rst":
+                     valor = valor  - piso[instruccion[1]];
+                     document.getElementById("valor").textContent = valor;
+                     break;
+                  case "add":
+                     valor = valor  + piso[instruccion[1]];
+                     document.getElementById("valor").textContent = valor;
+                     break;
+                  case "++":
+                     piso[instruccion[1]] =piso[instruccion[1]] + 1;
+                     break;
+                  case "__":
+                     piso[instruccion[1]] =piso[instruccion[1]] - 1;
+                     break;
+                  case "jmp":
+                     c = instruccion[1];
+                     c--;
+                     break;
+                  case "jmp0":
+                     if (valor == 0) {
+                        c = instruccion[1];
+                        c--;
+                     }
+                     break;
+                  case "jmpneg":
+                     if (valor < 0) {
+                        c = parseInt(instruccion[1]);
+                        c--;
+                     }
+                     break;
+                  default:
+               }
+               c++;
+         }
+         else {
+            if ( comparar(salidaUsuario,respuestas)) {
+               guardarResultados();
+               document.getElementById("resultado").textContent = "Muy bien! lo has logrado";
+            }
+            else {
+               document.getElementById("resultado").textContent = "MAL";
+            }
+         }
+
+         }
+      function ejecutar(){
+         var contadorSalidas = 0;
+         var salidaUsuario = [];
+         var piso = obtenerPiso();
+         var respuestas  = obtenerSalidas(); //vector de salida
+         var valor; //lo que tiene actualmente
+         var  i = 1;
+         instrucciones = obtenerInstrucciones();
+         while(i<instrucciones.length){
+            var instruccion = instrucciones[i].split("-"); //split en caso de ser una instruccion con numero
+            switch (instruccion[0]) {
+               case "in":
+                  valor = entrada();
+                  if (!(valor >= 0)) {
+                     if ( comparar(salidaUsuario,respuestas)) {
+                        guardarResultados();
+                        document.getElementById("resultado").textContent = "Muy bien! lo has logrado";
+                     }
+                     else {
+                        document.getElementById("resultado").textContent = "MAL";
+                     }
+                  }
+                  document.getElementById("valor").textContent = valor;
+                  break;
+               case "out":
+                  if (!(respuestas.length == salidaUsuario.length)) {
+                     salidaUsuario[contadorSalidas] = valor;
+                     clon = document.getElementById("valor").cloneNode(true);
+                     clon.className = "entrada";
+                     document.getElementById("salidaUsuario").appendChild(clon);
+                     contadorSalidas++;
+                  }
+                  break;
+               case "cpy2":
+                  var id = "losa" + instruccion[1];
+                  piso[instruccion[1]] = valor;
+                  document.getElementById(id).textContent = piso[instruccion[1]];
+                  break;
+               case "cpyf":
+                  valor = piso[instruccion[1]];
+                  document.getElementById("valor").textContent = valor;
+                  break;
+               case "rst":
+                  valor = valor  - piso[instruccion[1]];
+                  document.getElementById("valor").textContent = valor;
+                  break;
+               case "add":
+                  valor = valor  + piso[instruccion[1]];
+                  document.getElementById("valor").textContent = valor;
+                  break;
+               case "++":
+                  piso[instruccion[1]] =piso[instruccion[1]] + 1;
+                  break;
+               case "__":
+                  piso[instruccion[1]] =piso[instruccion[1]] - 1;
+                  break;
+               case "jmp":
+                  i = instruccion[1];
+                  continue;
+                  break;
+               case "jmp0":
+                  if (valor == 0) {
+                     i = instruccion[1];
+                  }
+                  continue;
+                  break;
+               case "jmpneg":
+                  if (valor < 0) {
+                     i = parseInt(instruccion[1]);
+                     continue;
+                  }
+                  break;
+               default:
+            }
+            i++;
+         }
+         if ( comparar(salidaUsuario,respuestas)) {
+            guardarResultados();
+            document.getElementById("resultado").textContent = "Muy bien! lo has logrado";
+         }
+         else {
+            document.getElementById("resultado").textContent = "MAL! REINICIA WEY";
+         }
+      }
+      function comparar(vec1,vec2){
+         for (var i = 0; i < vec1.length; i++) {
+            if (parseInt(vec1[i]) != parseInt(vec2[i+1])) {
+               return false;
+            }
+         }
+         return true;
+      }
+      function guardarResultados(){
+         instrucciones = obtenerInstrucciones();
+         id_juego = document.getElementById("id_juego").getAttribute("valor");
+         var cadena = id_juego + ','  + (horas+":"+minutos+":"+segundos) + ',' + instrucciones.length;
+         window.location.href = "/resultados/"  + cadena + "/";
+            }
+      function entrada(){
+         var entrada = "0";
+         var entradas = document.getElementsByClassName("entrada");
+         if (entradas.length>=1) { // si todavia hay entradas la remueve
+            entrada = entradas[0].getAttribute("valor");
+            entradas[0].parentElement.removeChild(entradas[0]);
+         }
+         else return "";
+         return parseInt(entrada);
+      }
+      function obtenerInstrucciones(){
+         /*entrada  = in
+         salida = out
+         copiar a_ = cpy2-#
+         copiar de_ = cpyf-#
+         restar_ = rst-#
+         sumar_ = add-#
+         saltar_ = jmp-#
+         saltar si 0_ = jmp0-#
+         saltar si -_ = jmpneg-#
+         ++_ = ++-#
+         --_= __-#*/
+         var vector = []
+         var contador = 0;
+         cambiadas = document.getElementsByClassName("ejecutando");
+         for (var i = 0; i < cambiadas.length; i++) {
+            cambiadas[i].className = "escogidos";
+         }
+         instrucciones  = document.getElementsByClassName("escogidos");
+         for (var i = 0; i < instrucciones.length; i++) {
+            instrucciones[i].id = "instruc" + (i+1);
+            var cadena =instrucciones[i].getAttribute("shortcut");
+            var numero = "";
+            if (instrucciones[i].getAttribute("tipo")== "piso" || instrucciones[i].getAttribute("tipo")== "salto") {
+               numero = instrucciones[i ].getAttribute("numero");
+            }
+            vector[i+1] =cadena + numero;
+
+         }
+         return vector;
+         }
+      function dragend(e){
+       dragging.style.background = "#212020";
+       dragging.style.color = "white";
+      }
+      function dragover(e){
+       e.preventDefault();
+       this.classList.add('over');
+       return false;
+      }
+      function dragenter(){
+
+      }
+      function GetNumber(i,f, texto1, texto2) {
+       var val = prompt(texto1,'','');
+       while ((val > f || val < i) || (parseFloat(val) != val)) {
+            val = prompt(texto2,'','');
+       }
+       return val;
+      }
+      function contarescogidos(){
+       var elements = document.getElementsByClassName('escogidos');
+       var lenescogidos = 0;
+       for (i in elements)
+            {
+                var element = elements[i];
+                if(typeof element.style != "undefined"){
+                   lenescogidos +=1;
+                }
+            }
+       return lenescogidos;
+      }
+      function dragleave(e){
+       e.preventDefault();
+       this.classList.remove('over');
+       return false;
+      }
+      function dragstart(e){
+       this.style.color="black";
+       this.style.background="white";
+       dragging = this;
+      }
+      function drop(e){
+       e.preventDefault();
+       var padre = document.createElement('p');
+       var clon = dragging.cloneNode(true);
+       clon.addEventListener('dragstart',dragstart,false);
+       clon.addEventListener("dragend",dragend,false);
+       clon.style.background = "#212020";
+       clon.style.color = "white";
+       clon.className = "escogidos";
+       if (clon.getAttribute("tipo") == "normal"){
+            this.appendChild(clon);
+            return;
+       }
+       if (clon.getAttribute("tipo") == "piso"){
+            var numero = GetNumber(0,6,"Introduzca el número de piso [0-6]:","Introduzca solo números de piso [0-6]:");
+            clon.setAttribute("numero", numero);
+            clon.textContent = clon.getAttribute("text") + numero + "]"
+            this.appendChild(clon);
+            return;
+       }
+       if (contarescogidos() > 0){
+            var numero = GetNumber(1,contarescogidos(),"Introduzca el número de línea a saltar:","Introduzca solo números de líneas que existan:");
+            clon.setAttribute("numero", numero);
+            clon.textContent = clon.getAttribute("text") + numero + "]"
+            this.appendChild(clon);
+       }
+      }
+</script>
+
+<body onload="empezar()">
+               <header>
+                  <h1>
+                     {{juego.descripcion}}
+                  </h1>
+               </header>
+               <div class="valor" >
+                     <div id="valor"></div>
+                  </div>
+               <div class="piso">
+                  {%for losa in piso%}
+                  <div  class="losa" valor = "{{losa}}">{{losa}}</div>
+                  {%endfor%}
+               </div>
+               <div>
+                  {%for salida in salidas%}
+                  <div class="salida" valor="{{salida}}"></div>
+                  {%endfor%}
+                  </div>
+               <article class="container" id = "Container"></article>
+               <article class="source" id = "Source">
+                   <h2 class="instrucciones" shortcut="in" tipo="normal" text="Entrada" draggable='true'>Entrada</h2>
+                   <h2 class="instrucciones"shortcut="out" tipo="normal" text="Salida" draggable='true'>Salida</h2>
+                   <h2 class="instrucciones"shortcut="cpy2-" tipo="piso" numero = 0 text="Copiar a [" draggable='true'>Copiar a [_]</h2>
+                   <h2 class="instrucciones"shortcut="cpyf-" tipo="piso" numero = 0 text="Copiar de [" draggable='true'>Copiar de [_]</h2>
+                   <h2 class="instrucciones"shortcut="rst-" tipo="piso" numero = 0 text="Restar[" draggable='true'>Restar[_]</h2>
+                   <h2 class="instrucciones"shortcut="add-" tipo="piso" numero = 0 text="Sumar[" draggable='true'>Sumar[_]</h2>
+                   <h2 class="instrucciones"shortcut="jmp-" tipo="salto" numero = 0 text="Saltar[" draggable='true'>Saltar[_]</h2>
+                   <h2 class="instrucciones"shortcut="jmp0-" tipo="salto" numero = 0 text="Saltar si 0[" draggable='true'>Saltar si 0[_]</h2>
+                   <h2 class="instrucciones"shortcut="jmpneg-" tipo="salto" numero = 0 text="Saltar si -[" draggable='true'>Saltar si -[_]</h2>
+                   <h2 class="instrucciones"shortcut="++-" tipo="piso" numero = 0 text="+ +[" draggable='true'>+ +[_]</h2>
+                   <h2 class="instrucciones"shortcut="__-" tipo="piso" numero = 0 text="- -[" draggable='true'>- -[_]</h2>
+               </article>
+               <article id="entrada">
+                  {%for entrada in entradas%}
+                  <div class="entrada" valor="{{entrada}}">{{entrada}}</div>
+                  {%endfor%}
+               </article>
+               <article id="salidaUsuario">
+
+               </article>
+               <button onclick="ejecutar()" type="button" class="btn-perron"id="ejecutar">Ejecutar</button>
+               <button onclick="pasoApaso()" type="button" class="btn-perron"id="pasoApaso">Paso a Paso</button>
+               <a class="btn-perron" id="salir" href="{%url 'alumnosIndex'%}">Salir</a>
+               <a class="btn-perron" id="reiniciar"href="{%url 'juego' id_grupo juego.id%}">Reiniciar</a>
+               <div id="contenedorReloj">
+                      <div class="reloj" id="Horas">00</div>
+                      <div class="reloj" id="Minutos">:00</div>
+                      <div class="reloj" id="Segundos">:00</div>
+                      <div class="reloj" id="Centesimas">:00</div>
+               </div>
+               <div id="resultado" class="text-success"></div>
+               <div id="id_juego" valor="{{juego.id}}"></div>
+</body>
+
+</html>

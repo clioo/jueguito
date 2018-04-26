@@ -1,0 +1,47 @@
+{%extends 'base/base.html'%}
+{%block opcionesnavbar%}
+<li><a href="{%url 'logout'%}">Salir</a></li>
+{%endblock%}
+
+
+{% block content %}
+
+<table class="table table-bordered">
+	<thead>
+		<tr>
+         <td>Usuario</td>
+         <td>Apellido paterno</td>
+         <td>Apellido materno</td>
+         <td>Nombre</td>
+			<td>Numero de instrucciones</td>
+         <td>Juego</td>
+			<td>Tiempo</td>
+			<td>Fecha</td>
+		</tr>
+
+	</thead>
+	<tbody>
+		{% if resultados %}
+		{% for usuario in usuarios %}
+         {%for resultado in resultados%}
+               {%if usuario.Usuario == resultado.usuario and resultado.juego.grupo == grupo%}
+         		<tr>
+                  <td>{{resultado.usuario.username}}</td>
+                  <td>{{ resultado.usuario.profile.apellidoPaterno }}</td>
+         			<td>{{ resultado.usuario.profile.apellidoMaterno}}</td>
+                  <td>{{ resultado.usuario.profile.nombre}}</td>
+                  <td>{{resultado.instrucciones}}</td>
+         			<td>{{ resultado.juego.descripcion}}</td>
+         			<td>{{resultado.tiempo}}</td>
+                  <td>{{resultado.fecha}}</td>
+         		</tr>
+               {%endif%}
+         {% endfor %}
+		{% endfor %}
+		{% else %}
+		<h1>No hay registro de resultados</h1>
+		{% endif %}
+	</tbody>
+</table>
+
+{% endblock%}

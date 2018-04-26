@@ -1,0 +1,37 @@
+{%extends 'base/base.html'%}
+{%block opcionesnavbar%}
+<li><a href="{%url 'logout'%}">Salir</a></li>
+{%endblock%}
+
+{% block content %}
+
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<td>#</td>
+			<td>Descripción</td>
+			<td>Acciones</td>
+		</tr>
+
+	</thead>
+	<tbody>
+		{% if grupos %}
+		{% for grupo in grupos %}
+		<tr>
+			<td>{{ grupo.Grupo.id }}</td>
+			<td>{{ grupo.Grupo.descripcion }}</td>
+			<td>
+				<a class="btn btn-success" href="{%url 'juego' grupo.Grupo.id '0'%}">Jugar</a>
+				<a class="btn btn-warning" href="{%url 'resultadosAlumno' grupo.Grupo.id%}">Ver resultados</a>
+				<a class="btn btn-warning" href="{%url 'listaJuegosAlumno' grupo.Grupo.id%}">Ver juegos</a>
+				<a class="btn btn-danger" href="{%url 'salirGrupo' grupo.Grupo.id%}">Salir</a>
+			</td>
+		</tr>
+		{% endfor %}
+		{% else %}
+		<h1>No hay registro de grupos</h1>
+		{% endif %}
+	</tbody>
+</table>
+
+{% endblock%}

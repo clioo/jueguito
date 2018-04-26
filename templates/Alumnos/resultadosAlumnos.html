@@ -1,0 +1,19 @@
+{% extends 'base/base.html' %}
+
+{% block extrastatic %}
+   <style>
+       #seguirJugando{
+          position: absolute;
+          bottom: 1%;
+          left: 50%;
+       }
+   </style>
+   {% endblock %}
+
+{%block opcionesnavbar%}
+   <li ><a href="{% url 'logout'%}">Salir</a></li>
+{%endblock%}
+
+{%block content%}
+   <a id="seguirJugando" class="btn btn-default"  href="{%url 'gruposUnidos'%}">Seguir jugando</a>
+{%endblock%}

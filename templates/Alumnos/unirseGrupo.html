@@ -1,0 +1,13 @@
+{%extends 'base/base.html'%}
+
+{%block opcionesnavbar%}
+<li><a href="{%url 'logout'%}">Salir</a></li>
+{%endblock%}
+
+{%block content%}
+<form method="post">
+   {%csrf_token%}
+   {{form.as_p}}
+   <button class="btn btn-default" type="submit">Unirse</button>
+</form>
+{%endblock%}

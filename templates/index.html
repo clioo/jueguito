@@ -1,0 +1,14 @@
+{%extends 'base/base.html'%}
+
+{% block navbar %}
+      <nav class="navbar navbar-default" role="navigation">
+         <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+               {%block opcionesnavbar%}
+               <li><a href="{%url 'registrarse'%}">Registrarse</a></li>
+               <li><a href="{%url 'login'%}">Iniciar sesion</a></li>
+               {%endblock%}
+            </ul>
+         </div>
+   </nav>
+{% endblock %}

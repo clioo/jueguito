@@ -1,0 +1,34 @@
+{%extends 'base/base.html'%}
+{%block opcionesnavbar%}
+<li><a href="{%url 'logout'%}">Salir</a></li>
+{%endblock%}
+
+{% block content %}
+
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<td>Numero de instrucciones</td>
+         <td>Juego</td>
+			<td>Tiempo</td>
+			<td>Fecha</td>
+		</tr>
+
+	</thead>
+	<tbody>
+		{% if resultados %}
+		{% for resultado in resultados %}
+		<tr>
+         <td>{{resultado.instrucciones}}</td>
+			<td>{{ resultado.juego.descripcion}}</td>
+			<td>{{resultado.tiempo}}</td>
+         <td>{{resultado.fecha}}</td>
+		</tr>
+		{% endfor %}
+		{% else %}
+		<h1>No hay registro de resultados</h1>
+		{% endif %}
+	</tbody>
+</table>
+
+{% endblock%}

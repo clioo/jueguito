@@ -1,0 +1,38 @@
+{% extends 'base/base.html' %}
+{%block opcionesnavbar%}
+   <li class="active"><a href="{% url 'alumnosIndex'%}">Inicio</a></li>
+{%endblock%}
+
+
+{% block content %}
+   <table class="table table-bordered">
+   	<thead>
+   		<tr>
+   			<td>#</td>
+   			<td>Nombre</td>
+   			<td>Apellido paterno</td>
+   			<td>Apellido materno</td>
+   			<td>Sexo</td>
+   			<td>Institucion</td>
+   			<td>Grupo</td>
+   		</tr>
+   	</thead>
+   	<tbody>
+   		{% if alumnos %}
+   		{% for alumno in alumnos%}
+   		<tr>
+   			<td>{{ alumno.id }}</td>
+   			<td>{{ alumno.nombre }}</td>
+   			<td>{{ alumno.apellidoPaterno }}</td>
+   			<td>{{ alumno.apellidoMaterno }}</td>
+            <td>{{ alumno.sexo }}</td>
+   			<td>{{ alumno.institucion }}</td>
+            <td>{{ alumno.grupo }}</td>
+   		</tr>
+   		{% endfor %}
+   		{% else %}
+   		<h1>No hay registros de Alumnos</h1>
+   		{% endif %}
+   	</tbody>
+   </table>
+{% endblock%}

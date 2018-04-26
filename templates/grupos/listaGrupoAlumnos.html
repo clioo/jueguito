@@ -1,0 +1,34 @@
+{%extends 'base/base.html'%}
+{%block opcionesnavbar%}
+<li><a href="{%url 'logout'%}">Salir</a></li>
+{%endblock%}
+
+{% block content %}
+
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<td>Apellido Paterno</td>
+			<td>Apellido Materno</td>
+			<td>Nombre</td>
+         <td>Usuario</td>
+		</tr>
+
+	</thead>
+	<tbody>
+		{% if grupoDeAlumnos %}
+		{% for alumno in grupoDeAlumnos %}
+		<tr>
+			<td>{{ alumno.Usuario.profile.apellidoPaterno }}</td>
+			<td>{{ alumno.Usuario.profile.apellidoMaterno}}</td>
+         <td>{{ alumno.Usuario.profile.nombre}}</td>
+         <td>{{ alumno.Usuario.username}}</td>
+		</tr>
+		{% endfor %}
+		{% else %}
+		<h1>No hay registro de alumnos en este grupo</h1>
+		{% endif %}
+	</tbody>
+</table>
+
+{% endblock%}
